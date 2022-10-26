@@ -1,13 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
-	"net/http"
-	"net/url"
-	"os"
 )
 
 /*
@@ -18,53 +14,32 @@ import (
 },
 */
 
-type Todos struct {
-	Id        int    `json:"id"`
-	Title     string `json:"title"`
-	Completed bool   `json:"completed"`
+type MySlowReader struct {
+	Contents string
+	Pos      int
+}
+
+// if it is not the pointer POS is always 0 because it is a copy when passwd the struct to the function
+func (m *MySlowReader) Read(p []byte) (n int, err error) {
+	if m.Pos+1 <= len(m.Contents) {
+		n := copy(p, m.Contents[m.Pos:m.Pos+1])
+		m.Pos++
+		return n, nil
+	}
+	return 0, io.EOF
 }
 
 func main() {
 
-	args := os.Args
-
-	if len(args) < 2 {
-		log.Fatalf("Usage: ./http-get <url>\n")
-
+	ms := MySlowReader{
+		Contents: "hello world",
 	}
 
-	if _, err := url.ParseRequestURI(args[1]); err != nil {
-		log.Fatalf("URL is in invalid format: %s\n", err)
-	}
-
-	res, err := http.Get(args[1])
-
+	out, err := io.ReadAll(&ms)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	defer res.Body.Close()
+	fmt.Println("Output:", string(out))
 
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if res.StatusCode != 200 {
-
-		log.Fatalf("Invalid output (HTTP code %d): %s\n", res.StatusCode, string(body))
-	}
-
-	var todos []Todos
-
-	err = json.Unmarshal(body, &todos)
-	if err != nil {
-		log.Fatal("Error Unmarshal ", err)
-	}
-
-	for _, todo := range todos {
-
-		fmt.Printf("JSON parsed Title: %s , Completed: %v\n", todo.Title, todo.Completed)
-
-	}
 }
