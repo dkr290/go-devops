@@ -3,24 +3,33 @@ package main
 import "fmt"
 
 type cat struct {
-}
-
-type Speaker interface {
-	Speak() string
-}
-
-func (c cat) Speak() string {
-	return "Purr Meow"
-}
-
-func chatter(s Speaker) {
-	fmt.Println(s.Speak())
+	name string
 }
 
 func main() {
 
-	c := cat{}
+	c := cat{name: "some name"}
+	i := []interface{}{42, "The book club", true, c}
+	typeExample(i)
 
-	chatter(c)
+}
+
+func typeExample(i []interface{}) {
+
+	for _, val := range i {
+
+		switch v := val.(type) {
+		case int:
+			fmt.Printf("%v is of type int\n", v)
+		case string:
+			fmt.Printf("%v is of type string\n", v)
+
+		case bool:
+			fmt.Printf("%v is of type bool\n", v)
+		default:
+			fmt.Printf("Unknown type\n")
+		}
+
+	}
 
 }
