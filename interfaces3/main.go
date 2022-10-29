@@ -3,63 +3,31 @@ package main
 import (
 	"errors"
 	"fmt"
+
+	"github.com/dkr290/go-devops/interfaces3/payroll"
 )
 
-type Employee struct {
-	Id        int
-	FirstName string
-	LastName  string
+var employeeReview = make(map[string]interface{})
+
+func init() {
+
+	fmt.Println("Welcome to the employee pay and performance review")
+	fmt.Println("**************************************************")
 }
 
-type Developer struct {
-	Individual        Employee
-	HourlyRate        float64
-	HoursWorkedInYear float64
-	Review            map[string]interface{}
-}
-
-type Manager struct {
-	Individual    Employee
-	Salary        float64
-	CommisionRate float64
-}
-
-type Payer interface {
-	Pay() (string, float64)
-}
-
-func (d *Developer) FullName() string {
-
-	return d.Individual.FirstName + " " + d.Individual.LastName
-}
-
-func (m *Manager) FullName() string {
-	return m.Individual.FirstName + " " + m.Individual.LastName
-}
-
-func (d *Developer) Pay() (string, float64) {
-	fullName := d.FullName()
-	return fullName, d.HourlyRate * d.HoursWorkedInYear
-
-}
-
-func (m *Manager) Pay() (string, float64) {
-	fullName := m.FullName()
-	return fullName, m.Salary + (m.Salary * m.CommisionRate)
-
-}
-
-func main() {
-
-	employeeReview := make(map[string]interface{})
+func init() {
+	fmt.Println("Initizlizing the variables")
 	employeeReview["WorkQuality"] = 5
 	employeeReview["TeamWork"] = 2
 	employeeReview["Communication"] = "Poor"
 	employeeReview["Problem-solving"] = 4
 	employeeReview["Dependibility"] = "Unsatisfatory"
+}
 
-	d1 := Developer{
-		Individual: Employee{
+func main() {
+
+	d1 := payroll.Developer{
+		Individual: payroll.Employee{
 			Id:        33923,
 			FirstName: "John",
 			LastName:  "Doe",
@@ -69,8 +37,8 @@ func main() {
 		Review:            employeeReview,
 	}
 
-	m1 := Manager{
-		Individual: Employee{
+	m1 := payroll.Manager{
+		Individual: payroll.Employee{
 			Id:        232342,
 			FirstName: "Kapil",
 			LastName:  "Blabla",
@@ -83,7 +51,7 @@ func main() {
 
 }
 
-func PayDetails(p Payer) {
+func PayDetails(p payroll.Payer) {
 
 	fn, pay := p.Pay()
 	fmt.Println(fn, "has got payed", pay, "year")
