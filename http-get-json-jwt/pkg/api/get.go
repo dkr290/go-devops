@@ -1,14 +1,11 @@
-package main
+package api
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 )
 
@@ -42,53 +39,8 @@ type Response interface {
 	GetResponse() string
 }
 
-var (
-	requestURL string
-	password   string
-	parsedURL  *url.URL
-	err        error
-)
-
-func main() {
-
-	flag.StringVar(&requestURL, "url", "", "url to access")
-	flag.StringVar(&password, "password", "", "use a password to access our api")
-	flag.Parse()
-
-	if parsedURL, err = url.ParseRequestURI(requestURL); err != nil {
-		fmt.Printf("Validation error: URL is not valid: %s", err)
-		flag.Usage()
-		os.Exit(1)
-	}
-
-	if password != "" {
-		token, err := doLoginRequest(parsedURL.Scheme+"://"+parsedURL.Host, password)
-		if err.Err != nil {
-
-			fmt.Printf("Error: %s (HTTP code: %d, Body:%s\n", err.Err, err.HTTPCode, err.Body)
-			os.Exit(1)
-		}
-		fmt.Printf(token)
-		os.Exit(1)
-	}
-
-	res, err := doRequest(parsedURL.String())
-
-	if err.Err != nil {
-
-		fmt.Printf("Error: %s (HTTP code: %d, Body:%s\n", err.Err, err.HTTPCode, err.Body)
-		os.Exit(1)
-	}
-
-	if res == nil {
-
-		log.Fatalln("No response")
-	}
-
-	fmt.Printf("Response: %s", res.GetResponse())
-}
-
-func doRequest(requestURL string) (Response, RequestError) {
+// make own http get client
+func doRequest(client http.Client, requestURL string) (Response, RequestError) {
 
 	if _, err := url.ParseRequestURI(requestURL); err != nil {
 		return nil, RequestError{
@@ -97,7 +49,7 @@ func doRequest(requestURL string) (Response, RequestError) {
 		}
 	}
 
-	response, err := http.Get(requestURL)
+	response, err := client.Get(requestURL)
 
 	if err != nil {
 		return nil, RequestError{
