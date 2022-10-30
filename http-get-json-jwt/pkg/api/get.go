@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
 	"net/url"
 	"strings"
 )
@@ -40,7 +39,7 @@ type Response interface {
 }
 
 // make own http get client
-func doRequest(client http.Client, requestURL string) (Response, RequestError) {
+func (a Api) DoGetRequest(requestURL string) (Response, RequestError) {
 
 	if _, err := url.ParseRequestURI(requestURL); err != nil {
 		return nil, RequestError{
@@ -49,7 +48,7 @@ func doRequest(client http.Client, requestURL string) (Response, RequestError) {
 		}
 	}
 
-	response, err := client.Get(requestURL)
+	response, err := a.Client.Get(requestURL)
 
 	if err != nil {
 		return nil, RequestError{

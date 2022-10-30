@@ -4,9 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"os"
+
+	"github.com/dkr290/go-devops/http-get-json-jwt/pkg/api"
 )
 
 var (
@@ -28,23 +29,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	client := http.Client{}
+	apiInstance := api.New(api.Options{
+		Password: password,
+		LoginUrl: parsedURL.Scheme + "://" + parsedURL.Host + "/login",
+	})
 
-	if password != "" {
-		token, err := api.doLoginRequest(client, parsedURL.Scheme+"://"+parsedURL.Host+"/login", password)
-		if err.Err != nil {
-
-			fmt.Printf("Error: %s (HTTP code: %d, Body:%s\n", err.Err, err.HTTPCode, err.Body)
-			os.Exit(1)
-		}
-
-		client.Transport = &pkg.api.myJWTTransport{
-			transport: http.DefaultTransport,
-			token:     token,
-		}
-	}
-
-	res, err := doRequest(client, parsedURL.String())
+	res, err := apiInstance.DoGetRequest(parsedURL.String())
 
 	if err.Err != nil {
 
