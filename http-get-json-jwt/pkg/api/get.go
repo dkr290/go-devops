@@ -27,7 +27,7 @@ type WordsPage struct {
 }
 
 func (w Words) GetResponse() string {
-	return fmt.Sprintf("%s", strings.Join(w.Words, ","))
+	return strings.Join(w.Words, ",")
 }
 
 func (o Occurrence) GetResponse() string {
@@ -35,7 +35,7 @@ func (o Occurrence) GetResponse() string {
 	for word, occurrence := range o.Words {
 		out = append(out, fmt.Sprintf("%s (%d)", word, occurrence))
 	}
-	return fmt.Sprintf("%s", strings.Join(out, ","))
+	return strings.Join(out, ",")
 
 }
 

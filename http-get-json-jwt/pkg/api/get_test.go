@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -50,5 +51,8 @@ func TestDoGetRequest(t *testing.T) {
 		t.Fatalf("response is empty")
 	}
 
-	if response.GetResponse() != strings.Join([]string{"a", "b"}, ",")
+	if response.GetResponse() != strings.Join([]string{"a", "b"}, ",") {
+
+		t.Errorf("Expected response: %s", response.GetResponse())
+	}
 }

@@ -24,7 +24,7 @@ func doLoginRequest(client http.Client, requestURL, password string) (string, Re
 
 	b, err := json.Marshal(loginRequest)
 	if err != nil {
-		return "", RequestError{Err: fmt.Errorf("Marshal Error: %s", err)}
+		return "", RequestError{Err: fmt.Errorf("marshal error: %s", err)}
 	}
 
 	bf := bytes.NewBuffer(b)
@@ -54,7 +54,7 @@ func doLoginRequest(client http.Client, requestURL, password string) (string, Re
 		return "", RequestError{
 			HTTPCode: response.StatusCode,
 			Body:     string(responseBody),
-			Err:      fmt.Errorf("Invalid output (HTTP Code %d): %s\n", response.StatusCode, string(responseBody)),
+			Err:      fmt.Errorf("invalid output (HTTP Code %d): %s", response.StatusCode, string(responseBody)),
 		}
 
 	}
@@ -63,7 +63,7 @@ func doLoginRequest(client http.Client, requestURL, password string) (string, Re
 		return "", RequestError{
 			HTTPCode: response.StatusCode,
 			Body:     string(responseBody),
-			Err:      fmt.Errorf("No valid JSON returned"),
+			Err:      fmt.Errorf("no valid JSON returned"),
 		}
 
 	}
@@ -82,7 +82,7 @@ func doLoginRequest(client http.Client, requestURL, password string) (string, Re
 		return "", RequestError{
 			HTTPCode: response.StatusCode,
 			Body:     string(responseBody),
-			Err:      fmt.Errorf("Empty token replied"),
+			Err:      fmt.Errorf("empty token replied"),
 		}
 	}
 
