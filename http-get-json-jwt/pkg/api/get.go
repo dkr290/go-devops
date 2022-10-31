@@ -21,6 +21,11 @@ type Occurrence struct {
 	Words map[string]int `json:"words"`
 }
 
+type WordsPage struct {
+	Page
+	Words
+}
+
 func (w Words) GetResponse() string {
 	return fmt.Sprintf("%s", strings.Join(w.Words, ","))
 }
@@ -44,7 +49,7 @@ func (a Api) DoGetRequest(requestURL string) (Response, RequestError) {
 	if _, err := url.ParseRequestURI(requestURL); err != nil {
 		return nil, RequestError{
 
-			Err: fmt.Errorf("Vaidation error, url is not valid: %s", err),
+			Err: fmt.Errorf("vaidation error, url is not valid: %s", err),
 		}
 	}
 
@@ -75,7 +80,7 @@ func (a Api) DoGetRequest(requestURL string) (Response, RequestError) {
 		return nil, RequestError{
 			HTTPCode: response.StatusCode,
 			Body:     string(body),
-			Err:      fmt.Errorf("Invalid output (HTTP Code %d): %s\n", response.StatusCode, string(body)),
+			Err:      fmt.Errorf("invalid output (HTTP Code %d): %s", response.StatusCode, string(body)),
 		}
 
 	}
@@ -84,7 +89,7 @@ func (a Api) DoGetRequest(requestURL string) (Response, RequestError) {
 		return nil, RequestError{
 			HTTPCode: response.StatusCode,
 			Body:     string(body),
-			Err:      fmt.Errorf("No valid JSON returned"),
+			Err:      fmt.Errorf("io valid JSON returned"),
 		}
 
 	}
@@ -96,7 +101,7 @@ func (a Api) DoGetRequest(requestURL string) (Response, RequestError) {
 		return nil, RequestError{
 			HTTPCode: response.StatusCode,
 			Body:     string(body),
-			Err:      fmt.Errorf("Page Unmarshal error %s", err),
+			Err:      fmt.Errorf("page Unmarshal error %s", err),
 		}
 	}
 
