@@ -15,9 +15,9 @@ RUN go build -o main .
 FROM golang:1.19.2-alpine3.15
 # Add maintainer info
 LABEL maintainer="Danail Surudzhiyski"
-ARG dbhost="TEST"
-ARG dbuser="USER"
-ARG dbpass="PASS"
+ARG dbhost
+ARG dbuser
+ARG dbpass
 ENV DATABASE_HOST=$dbhost
 ENV DATABASE_USER=$dbuser
 ENV DATABASE_PASS=$dbpass
