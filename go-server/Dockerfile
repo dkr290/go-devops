@@ -3,8 +3,7 @@ FROM golang:1.19.2-alpine3.15 as builder
 WORKDIR /build
 COPY go.mod ./
 RUN go mod download && go mod tidy
-COPY ../ .
-RUN ls -l
+COPY . .
 RUN go build -o main .
 
 
@@ -23,7 +22,8 @@ ENV DATABASE_HOST=$dbhost
 ENV DATABASE_USER=$dbuser
 ENV DATABASE_PASS=$dbpass
 
-COPY --from=builder /build/* .
+COPY --from=builder /build/main .
+COPY --from=builder /build/static ./static
 
 EXPOSE 8080
 
