@@ -22,7 +22,7 @@ ENV DATABASE_HOST=$dbhost
 ENV DATABASE_USER=$dbuser
 ENV DATABASE_PASS=$dbpass
 
-COPY --from=builder /build/main .
+COPY --from=builder /build/* .
 
 EXPOSE 8080
 
