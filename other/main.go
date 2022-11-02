@@ -1,34 +1,34 @@
 package main
 
-import "fmt"
-
-type cat struct {
-	name string
-}
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"reflect"
+)
 
 func main() {
 
-	c := cat{name: "some name"}
-	i := []interface{}{42, "The book club", true, c}
-	typeExample(i)
+	var jsonParsed any
+	err := json.Unmarshal([]byte(`{"test": {"test2":[1,2,3] },"test3": "..." }`), &jsonParsed)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-}
+	switch v := jsonParsed.(type) {
+	case map[string]any:
+		fmt.Printf("Map found: %v\n", v)
+		field1, ok := v["test"]
+		if ok {
+			switch v2 := field1.(type) {
+			default:
+				fmt.Printf("Type not found %v\n", reflect.TypeOf(v2))
 
-func typeExample(i []interface{}) {
-
-	for _, val := range i {
-
-		switch v := val.(type) {
-		case int:
-			fmt.Printf("%v is of type int\n", v)
-		case string:
-			fmt.Printf("%v is of type string\n", v)
-
-		case bool:
-			fmt.Printf("%v is of type bool\n", v)
-		default:
-			fmt.Printf("Unknown type\n")
+			}
 		}
+
+	default:
+		fmt.Printf("Type not found %v\n", reflect.TypeOf(jsonParsed))
 
 	}
 
