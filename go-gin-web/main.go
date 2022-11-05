@@ -10,7 +10,7 @@ import (
 func main() {
 	r := gin.Default()
 	r.Use(gin.Logger())
-
+	//loading static files
 	r.Static("/vendor", "./static/vendor")
 
 	r.LoadHTMLGlob("templates/**/**")
