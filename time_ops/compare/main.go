@@ -17,4 +17,11 @@ func main() {
 	} else {
 		fmt.Println("now is not the time yet")
 	}
+
+	fmt.Println("")
+
+	compEqual()
+	//durationCalcul()
+	transactionDeadline()
+
 }
