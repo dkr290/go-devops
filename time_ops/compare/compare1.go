@@ -66,3 +66,11 @@ func transactionDeadline() {
 		fmt.Println("Performance problem, transaction completed in", TrasactionTime, "seconds")
 	}
 }
+
+func addTime() {
+
+	TimeToManypolate := time.Now()
+	ToBeadded := time.Duration(10 * time.Second)
+	fmt.Println("The original time:", TimeToManypolate)
+	fmt.Println(ToBeadded, "duration later:", TimeToManypolate.Add(ToBeadded))
+}

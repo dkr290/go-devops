@@ -23,5 +23,5 @@ func main() {
 	compEqual()
 	//durationCalcul()
 	transactionDeadline()
-
+	addTime()
 }
