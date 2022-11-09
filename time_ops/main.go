@@ -32,4 +32,8 @@ func main() {
 
 	fmt.Println(timeDiff("America/Los_Angeles"))
 
+	formatTime()
+	formatTime1()
+	fmt.Println("The run of the function", timeRun(), "seconds")
+
 }
