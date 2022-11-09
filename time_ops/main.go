@@ -24,4 +24,10 @@ func main() {
 	//durationCalcul()
 	transactionDeadline()
 	addTime()
+
+	start := time.Now()
+	time.Sleep(2 * time.Second)
+	end := time.Now()
+	fmt.Println(elapsedTime(start, end))
+
 }
