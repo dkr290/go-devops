@@ -30,4 +30,6 @@ func main() {
 	end := time.Now()
 	fmt.Println(elapsedTime(start, end))
 
+	fmt.Println(timeDiff("America/Los_Angeles"))
+
 }
