@@ -12,9 +12,7 @@ type Repository struct {
 }
 
 // creates new repository
-func NewRepo(d *gorm.DB) *Repository {
-	r := Repository{
-		DB: d,
-	}
+func NewRepo() *Repository {
+	r := Repository{}
 	return &r
 }

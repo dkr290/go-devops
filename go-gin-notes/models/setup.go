@@ -8,9 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var DBConnect *gorm.DB
-
-var Repo = repository.NewRepo(DBConnect)
+var Repo = repository.NewRepo()
 
 func ConnectDatabase() {
 
