@@ -14,3 +14,17 @@ type Note struct {
 	UpdatedAt time.Time      `gorm:"Index"`
 	DeletedAt gorm.DeletedAt `gorm:"Index"`
 }
+
+func NotesAll() *[]Note {
+
+	var notes []Note
+	Repo.DB.Where("deleted_at is NULL").Order("updated_at desc").Find(&notes)
+	return &notes
+}
+
+func NoteCreate(name, content string) *Note {
+
+	noteEntry := Note{Name: name, Content: content}
+	Repo.DB.Create(&noteEntry)
+	return &noteEntry
+}

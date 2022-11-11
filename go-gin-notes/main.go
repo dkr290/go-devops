@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/dkr290/go-devops/go-gin-notes/controllers"
 	"github.com/dkr290/go-devops/go-gin-notes/models"
 
 	"github.com/gin-gonic/gin"
@@ -18,6 +19,10 @@ func main() {
 	r.LoadHTMLGlob("templates/**/**")
 	models.ConnectDatabase()
 	models.DbMigrate()
+
+	r.GET("/notes", controllers.NotesIndex)
+	r.GET("/notes/new", controllers.NotesNew)
+	r.POST("/notes", controllers.NotesCreate)
 
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "views/index.html", gin.H{
