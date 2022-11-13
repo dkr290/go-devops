@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/dkr290/go-devops/go-gin-notes/models"
 	"github.com/gin-gonic/gin"
@@ -37,4 +39,50 @@ func NotesCreate(c *gin.Context) {
 
 	c.Redirect(http.StatusMovedPermanently, "notes")
 
+}
+
+func NotesShow(c *gin.Context) {
+
+	idstr := c.Param("id")
+	id, err := strconv.ParseUint(idstr, 10, 64)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	note := models.NotesFind(id)
+	c.HTML(
+		http.StatusOK,
+		"notes/show.html",
+		gin.H{
+			"notes": note,
+		},
+	)
+}
+
+func NotesEditPage(c *gin.Context) {
+	idstr := c.Param("id")
+	id, err := strconv.ParseUint(idstr, 10, 64)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	note := models.NotesFind(id)
+	c.HTML(
+		http.StatusOK,
+		"notes/edit.html",
+		gin.H{
+			"notes": note,
+		},
+	)
+}
+
+func NotesUpdate(c *gin.Context) {
+	idstr := c.Param("id")
+	id, err := strconv.ParseUint(idstr, 10, 64)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	note := models.NotesFind(id)
+	name := c.PostForm("name")
+	content := c.PostForm("content")
+	note.NotesUpdate(name, content)
+	c.Redirect(http.StatusMovedPermanently, "/notes/"+idstr)
 }

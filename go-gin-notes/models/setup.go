@@ -18,7 +18,7 @@ func ConnectDatabase() {
 	// Repo.DbPort = os.Getenv("DATABASE_PORT")
 	// Repo.DbName = os.Getenv("DB_NAME")
 
-	Repo.DbHost = "172.22.127.252"
+	Repo.DbHost = "172.18.67.205"
 	Repo.DbPass = "Password123"
 	Repo.DbUser = "postgres"
 	Repo.DbPort = "5432"

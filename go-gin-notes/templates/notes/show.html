@@ -1,0 +1,31 @@
+{{ define "notes/show.html" }}
+{{ template "layouts/header.html"}}
+
+<div class="row">
+    
+        {{ range . }}
+    <div class="col-sm-6">
+      <div class="card">
+        <div class="card-body">
+          <h1 class="card-title">{{ .Name }}</h1>
+          <p class="card-text">{{ .Content }}</p>
+          
+          <div class="btn-group" role="group">
+            <a type="button" class="btn btn-outline-primary" href="/notes/edit/{{ .ID }}" role="button">Edit</a>
+            <a type="button" class="btn btn-outline-danger">Delete</a>
+         
+          </div>
+        </div>
+      </div>
+    </div>
+    {{ end }}
+   
+
+
+
+
+{{ template "layouts/footer.html"}}
+{{ end }}
+
+
+

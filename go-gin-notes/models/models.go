@@ -28,3 +28,17 @@ func NoteCreate(name, content string) *Note {
 	Repo.DB.Create(&noteEntry)
 	return &noteEntry
 }
+
+func NotesFind(id uint64) *Note {
+	var note Note
+
+	Repo.DB.Find(&note, id)
+	return &note
+}
+
+func (n *Note) NotesUpdate(name, content string) {
+	n.Name = name
+	n.Content = content
+	Repo.DB.Save(n)
+
+}

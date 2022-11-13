@@ -23,6 +23,9 @@ func main() {
 	r.GET("/notes", controllers.NotesIndex)
 	r.GET("/notes/new", controllers.NotesNew)
 	r.POST("/notes", controllers.NotesCreate)
+	r.GET("/notes/:id", controllers.NotesShow)
+	r.GET("/notes/edit/:id", controllers.NotesEditPage)
+	r.POST("/notes/:id", controllers.NotesUpdate)
 
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "views/index.html", gin.H{
