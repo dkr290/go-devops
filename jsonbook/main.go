@@ -105,5 +105,59 @@ func main() {
 			fmt.Println("(unknown):", k, val)
 		}
 	}
+	fmt.Println("")
+	jsonDataCust := []byte(`
+	{
+		"username": "blackhat",
+		"shipto": {
+		  "street": "Sulphur Springs Rd",
+		  "city": "Park City",
+		  "state": "VA",
+		  "zipcode": 12345
+		},
+		"order": {
+		  "payed": false,
+		  "orderdetail": [
+			{
+			  "itemname": "A Guide to the world of zeroes and ones",
+			  "desc": "book",
+			  "qty": 3,
+			  "price": 50
+			}
+		  ]
+		}
+	  }
+   `)
+
+	cm := jsonDataDecode(jsonDataCust)
+	fmt.Println(*cm)
+	var game Item
+	game.Name = "Final Fantasy The Zodiac Age"
+	game.Description = "Nintendo Switch Game"
+	game.Quantity = 1
+	game.Price = 50
+
+	var glass Item
+	glass.Name = "Crystal Drinking Glass"
+	glass.Quantity = 11
+	glass.Price = 25
+
+	cm.PurchaseOrder.OrderDetail = append(cm.PurchaseOrder.OrderDetail, game)
+	cm.PurchaseOrder.OrderDetail = append(cm.PurchaseOrder.OrderDetail, glass)
+
+	cm.Total()
+
+	cm.PurchaseOrder.Fragile = true
+	cm.PurchaseOrder.IsPayed = true
+
+	fmt.Println(*cm)
+
+	customerOrder, err := json.MarshalIndent(*cm, "", "    ")
+	if err != nil {
+		log.Fatalln("Error encode to json", err)
+
+	}
+
+	fmt.Println(string(customerOrder))
 
 }
