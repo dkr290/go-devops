@@ -22,10 +22,10 @@ type Item struct {
 }
 
 type Order struct {
-	TotalPrice  int    `json:"totalprice,omitempty"`
-	IsPayed     bool   `json:"payed"`
-	Fragile     bool   `json:"fragile,omitempty"`
-	OrderDetail []Item `json:"orderdetail"`
+	TotalPrice  int  `json:"totalprice,omitempty"`
+	IsPayed     bool `json:"payed"`
+	Fragile     bool `json:"fragile,omitempty"`
+	OrderDetail []Item
 }
 
 type Customer struct {
@@ -33,7 +33,7 @@ type Customer struct {
 	Password      string   `json:"-"`
 	Token         string   `json:"-"`
 	ShipTo        Address1 `json:"shipto"`
-	PurchaseOrder Order
+	PurchaseOrder Order    `json:"order"`
 }
 
 func jsonDataDecode(b []byte) *Customer {
