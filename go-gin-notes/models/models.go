@@ -40,5 +40,9 @@ func (n *Note) NotesUpdate(name, content string) {
 	n.Name = name
 	n.Content = content
 	Repo.DB.Save(n)
+}
 
+func NotesMarkDelete(id uint64) {
+	var note Note
+	Repo.DB.Delete(&note, id)
 }
