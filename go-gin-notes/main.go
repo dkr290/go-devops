@@ -28,8 +28,11 @@ func main() {
 	r.POST("/notes/:id", controllers.NotesUpdate)
 	r.DELETE("/notes/:id", controllers.NotesDelete)
 
+	r.GET("/login", controllers.LoginPage)
+	r.GET("/signup", controllers.SignupPage)
+
 	r.GET("/", func(ctx *gin.Context) {
-		ctx.HTML(http.StatusOK, "views/index.html", gin.H{
+		ctx.HTML(http.StatusOK, "home/index.html", gin.H{
 			"title": "Hello gin",
 		})
 	})
