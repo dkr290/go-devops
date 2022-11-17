@@ -57,12 +57,12 @@ func launchInstance(ctx context.Context, resourceGroupName, location, vnetName, 
 		ManagedBy: to.Ptr("Managed by user01"),
 	}
 	//creaste the resource group
-	resourceGroupREsponse, err := resourceGroupclient.CreateOrUpdate(ctx, resourceGroupName, rgParams, nil)
+	_, err = resourceGroupclient.CreateOrUpdate(ctx, resourceGroupName, rgParams, nil)
 	if err != nil {
 		return err
 	} else {
 		fmt.Printf("The resource group %s is creating... , please chgeck azure portal\n", resourceGroupName)
-		fmt.Printf("Response ... - %v", resourceGroupREsponse)
+
 	}
 	//create the virtusl network
 	virtualNetworkClient, err := armnetwork.NewVirtualNetworksClient(getSubscriptionID(), sshk.Token, nil)
@@ -90,11 +90,11 @@ func launchInstance(ctx context.Context, resourceGroupName, location, vnetName, 
 		return err
 	}
 
-	vnetResp, err := vnetPollerResp.PollUntilDone(ctx, nil)
+	_, err = vnetPollerResp.PollUntilDone(ctx, nil)
 	if err != nil {
 		return err
 	} else {
-		fmt.Println("Vnet is creating...\n", vnetResp)
+		fmt.Printf("Vnet %s is creating...", vnetName)
 	}
 
 	//create subnet
@@ -120,11 +120,127 @@ func launchInstance(ctx context.Context, resourceGroupName, location, vnetName, 
 		return err
 	}
 
-	subnetResp, err := subnetPollerResp.PollUntilDone(ctx, nil)
+	subnetResponse, err := subnetPollerResp.PollUntilDone(ctx, nil)
 	if err != nil {
 		return err
 	} else {
-		fmt.Println("Subnet is creating...\n", subnetResp)
+		fmt.Printf("Subnet %v is creating...\n", *subnetResponse.Name)
+	}
+	// create the public ip address
+
+	ipClient, err := armnetwork.NewPublicIPAddressesClient(getSubscriptionID(), sshk.Token, nil)
+	if err != nil {
+		return err
+	}
+	polerIPAddressResponse, err := ipClient.BeginCreateOrUpdate(
+		ctx,
+		resourceGroupName,
+		"pubIPaddress-net01",
+		armnetwork.PublicIPAddress{
+			Location: to.Ptr(location),
+			Properties: &armnetwork.PublicIPAddressPropertiesFormat{
+				PublicIPAllocationMethod: to.Ptr(armnetwork.IPAllocationMethodStatic),
+			},
+		},
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+
+	ipAddressPolResponse, err := polerIPAddressResponse.PollUntilDone(ctx, nil)
+	if err != nil {
+		return err
+	} else {
+		fmt.Printf("Public IP  %v is creating...", ipAddressPolResponse.Name)
+	}
+
+	//Network Security Group
+
+	nsgSecurityClient, err := armnetwork.NewSecurityGroupsClient(getSubscriptionID(), sshk.Token, nil)
+	if err != nil {
+		return err
+	}
+	nsgSecurityResponse, err := nsgSecurityClient.BeginCreateOrUpdate(
+		ctx,
+		resourceGroupName,
+		"nsg-demo",
+		armnetwork.SecurityGroup{
+			Location: to.Ptr(location),
+			Properties: &armnetwork.SecurityGroupPropertiesFormat{
+				SecurityRules: []*armnetwork.SecurityRule{
+					{
+						Name: to.Ptr("allow-ssh"),
+						Properties: &armnetwork.SecurityRulePropertiesFormat{
+							SourceAddressPrefix:      to.Ptr("0.0.0.0/0"),
+							SourcePortRange:          to.Ptr("*"),
+							DestinationAddressPrefix: to.Ptr("0.0.0.0/0"),
+							DestinationPortRange:     to.Ptr("22"),
+							Protocol:                 to.Ptr(armnetwork.SecurityRuleProtocolTCP),
+							Access:                   to.Ptr(armnetwork.SecurityRuleAccessAllow),
+							Direction:                to.Ptr(armnetwork.SecurityRuleDirectionInbound),
+							Description:              to.Ptr("allow ssh on port 22"),
+							Priority:                 to.Ptr(int32(1001)),
+						},
+					},
+				},
+			},
+		},
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+
+	nsgSecurityGroupPResponse, err := nsgSecurityResponse.PollUntilDone(ctx, nil)
+	if err != nil {
+		return err
+	} else {
+		fmt.Printf("NSG %v is creating...\n", nsgSecurityGroupPResponse.ID)
+	}
+
+	interfaceClient, err := armnetwork.NewInterfacesClient(getSubscriptionID(), sshk.Token, nil)
+	if err != nil {
+		return err
+	}
+
+	netInterfacePolerResponse, err := interfaceClient.BeginCreateOrUpdate(
+		ctx,
+		resourceGroupName,
+		"vm-network-interface-01",
+		armnetwork.Interface{
+			Location: to.Ptr(location),
+			Properties: &armnetwork.InterfacePropertiesFormat{
+				NetworkSecurityGroup: &armnetwork.SecurityGroup{
+					ID: nsgSecurityGroupPResponse.ID,
+				},
+				IPConfigurations: []*armnetwork.InterfaceIPConfiguration{
+					{
+						Name: to.Ptr("pubIPaddress-net01"),
+						Properties: &armnetwork.InterfaceIPConfigurationPropertiesFormat{
+							PrivateIPAllocationMethod: to.Ptr(armnetwork.IPAllocationMethodDynamic),
+							Subnet: &armnetwork.Subnet{
+								ID: subnetResponse.ID,
+							},
+							PublicIPAddress: &armnetwork.PublicIPAddress{
+								ID: ipAddressPolResponse.ID,
+							},
+						},
+					},
+				},
+			},
+		},
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+
+	netInterfaceResponse, err := netInterfacePolerResponse.PollUntilDone(ctx, nil)
+	if err != nil {
+		return err
+	} else {
+		fmt.Printf("Network Interface %v is creating...\n", netInterfaceResponse.ID)
 	}
 
 	return nil
