@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/dkr290/go-devops/azure-instance/keys"
@@ -32,7 +35,7 @@ func main() {
 	}
 
 	if err := launchInstance(ctx, rg, location, vnetName, subnetName); err != nil {
-		log.Fatalln("Could not create resource group", rg)
+		log.Fatalln("Launch instance error", err)
 	}
 
 }
@@ -49,7 +52,8 @@ func launchInstance(ctx context.Context, resourceGroupName, location, vnetName, 
 	// create the client for azure resource group
 	resourceGroupclient, err := armresources.NewResourceGroupsClient(getSubscriptionID(), sshk.Token, nil)
 	if err != nil {
-		log.Fatalln(err)
+
+		return err
 	}
 
 	rgParams := armresources.ResourceGroup{
@@ -70,31 +74,39 @@ func launchInstance(ctx context.Context, resourceGroupName, location, vnetName, 
 		return err
 	}
 
-	vnetPollerResp, err := virtualNetworkClient.BeginCreateOrUpdate(
-		ctx,
-		resourceGroupName,
-		vnetName,
-		armnetwork.VirtualNetwork{
-			Location: to.Ptr(location),
-			Properties: &armnetwork.VirtualNetworkPropertiesFormat{
-				AddressSpace: &armnetwork.AddressSpace{
-					AddressPrefixes: []*string{
-						to.Ptr("10.1.0.0/16"),
-					},
-				},
-			},
-		},
-		nil)
+	found, err := findVnet(ctx, resourceGroupName, vnetName, virtualNetworkClient)
 
 	if err != nil {
 		return err
 	}
+	if !found {
+		vnetPollerResp, err := virtualNetworkClient.BeginCreateOrUpdate(
+			ctx,
+			resourceGroupName,
+			vnetName,
+			armnetwork.VirtualNetwork{
+				Location: to.Ptr(location),
+				Properties: &armnetwork.VirtualNetworkPropertiesFormat{
+					AddressSpace: &armnetwork.AddressSpace{
+						AddressPrefixes: []*string{
+							to.Ptr("10.1.0.0/16"),
+						},
+					},
+				},
+			},
+			nil)
 
-	_, err = vnetPollerResp.PollUntilDone(ctx, nil)
-	if err != nil {
-		return err
-	} else {
-		fmt.Printf("Vnet %s is creating...", vnetName)
+		if err != nil {
+			return err
+		}
+
+		vnetPolerResponse, err := vnetPollerResp.PollUntilDone(ctx, nil)
+		if err != nil {
+			return err
+		} else {
+			fmt.Printf("Vnet %v is creating...", *vnetPolerResponse.ID)
+		}
+
 	}
 
 	//create subnet
@@ -152,7 +164,7 @@ func launchInstance(ctx context.Context, resourceGroupName, location, vnetName, 
 	if err != nil {
 		return err
 	} else {
-		fmt.Printf("Public IP  %v is creating...", ipAddressPolResponse.Name)
+		fmt.Printf("Public IP  %v is creating...\n", *ipAddressPolResponse.Name)
 	}
 
 	//Network Security Group
@@ -196,7 +208,7 @@ func launchInstance(ctx context.Context, resourceGroupName, location, vnetName, 
 	if err != nil {
 		return err
 	} else {
-		fmt.Printf("NSG %v is creating...\n", nsgSecurityGroupPResponse.ID)
+		fmt.Printf("NSG %v is creating...\n", *nsgSecurityGroupPResponse.Name)
 	}
 
 	interfaceClient, err := armnetwork.NewInterfacesClient(getSubscriptionID(), sshk.Token, nil)
@@ -240,9 +252,96 @@ func launchInstance(ctx context.Context, resourceGroupName, location, vnetName, 
 	if err != nil {
 		return err
 	} else {
-		fmt.Printf("Network Interface %v is creating...\n", netInterfaceResponse.ID)
+		fmt.Printf("Network Interface %v is creating...\n", *netInterfaceResponse.Name)
+	}
+
+	// Create the vm
+
+	fmt.Println("Creating the vm")
+	vmClient, err := armcompute.NewVirtualMachinesClient(getSubscriptionID(), sshk.Token, nil)
+	if err != nil {
+		return err
+	}
+
+	parameters := armcompute.VirtualMachine{
+		Location: to.Ptr(location),
+		Identity: &armcompute.VirtualMachineIdentity{
+			Type: to.Ptr(armcompute.ResourceIdentityTypeNone),
+		},
+		Properties: &armcompute.VirtualMachineProperties{
+			StorageProfile: &armcompute.StorageProfile{
+				ImageReference: &armcompute.ImageReference{
+
+					Offer:     to.Ptr("0001-com-ubuntu-server-focal"),
+					Publisher: to.Ptr("canonical"),
+					SKU:       to.Ptr("20_04-lts-gen2"),
+					Version:   to.Ptr("latest"),
+				},
+				OSDisk: &armcompute.OSDisk{
+					Name:         to.Ptr("disk-01"),
+					CreateOption: to.Ptr(armcompute.DiskCreateOptionTypesFromImage),
+					Caching:      to.Ptr(armcompute.CachingTypesReadWrite),
+					ManagedDisk: &armcompute.ManagedDiskParameters{
+						StorageAccountType: to.Ptr(armcompute.StorageAccountTypesStandardLRS), // OSDisk type Standard/Premium HDD/SSD
+					},
+					DiskSizeGB: to.Ptr[int32](50), // default 127G
+				},
+			},
+			HardwareProfile: &armcompute.HardwareProfile{
+				VMSize: to.Ptr(armcompute.VirtualMachineSizeTypes("Standard_B2s")), // VM size include vCPUs,RAM,Data Disks,Temp storage.
+			},
+			OSProfile: &armcompute.OSProfile{ //
+				ComputerName:  to.Ptr("server01"),
+				AdminUsername: to.Ptr("azureadmin"),
+				LinuxConfiguration: &armcompute.LinuxConfiguration{
+					DisablePasswordAuthentication: to.Ptr(true),
+					SSH: &armcompute.SSHConfiguration{
+						PublicKeys: []*armcompute.SSHPublicKey{
+							{
+								Path:    to.Ptr(fmt.Sprintf("/home/%s/.ssh/authorized_keys", "azureadmin")),
+								KeyData: to.Ptr(string(sshk.PublicKey)),
+							},
+						},
+					},
+				},
+			},
+			NetworkProfile: &armcompute.NetworkProfile{
+				NetworkInterfaces: []*armcompute.NetworkInterfaceReference{
+					{
+						ID: netInterfaceResponse.ID,
+					},
+				},
+			},
+		},
+	}
+
+	pollerResponse, err := vmClient.BeginCreateOrUpdate(ctx, resourceGroupName, "Server01", parameters, nil)
+	if err != nil {
+		return err
+	}
+
+	vmResponse, err := pollerResponse.PollUntilDone(ctx, nil)
+	if err != nil {
+		return err
+	} else {
+		fmt.Printf("Virtual Machine %v is creating...\n", *vmResponse.Name)
 	}
 
 	return nil
+
+}
+
+func findVnet(ctx context.Context, rg, vnetName string, vnetClient *armnetwork.VirtualNetworksClient) (bool, error) {
+
+	_, err := vnetClient.Get(ctx, rg, vnetName, nil)
+	if err != nil {
+		var errResponse *azcore.ResponseError
+		if errors.As(err, &errResponse) && errResponse.ErrorCode == "ResourceNotFound" {
+			return false, nil
+		}
+		return false, err
+
+	}
+	return true, nil
 
 }
