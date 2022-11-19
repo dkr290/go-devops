@@ -22,7 +22,7 @@ var (
 func main() {
 
 	ctx = context.Background()
-	instanceID, err := createEC2(region, ctx)
+	instanceID, err = createEC2(region, ctx)
 	if err != nil {
 		fmt.Printf("create EC2 instance error %s", err)
 		os.Exit(1)
