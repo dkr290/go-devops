@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"os"
 
@@ -13,10 +14,12 @@ import (
 )
 
 var (
-	instanceID string
-	err        error
-	ctx        context.Context
-	region     string = "eu-central-1"
+	instanceID  string
+	err         error
+	ctx         context.Context
+	region      string = "eu-central-1"
+	keyPairName string = "go-aws-demo"
+	pemFilename string = "go-aws.pem"
 )
 
 func main() {
@@ -40,11 +43,28 @@ func createEC2(region string, ctx context.Context) (string, error) {
 	}
 
 	ec2Client := ec2.NewFromConfig(cfg)
-	_, err = ec2Client.CreateKeyPair(ctx, &ec2.CreateKeyPairInput{
-		KeyName: aws.String("go-aws-demo"),
+
+	keyPair, err := ec2Client.DescribeKeyPairs(ctx, &ec2.DescribeKeyPairsInput{
+		KeyNames: []string{keyPairName},
 	})
-	if err != nil {
-		return "", fmt.Errorf("unable to create key pair, %v", err)
+	if err != nil && !strings.Contains(err.Error(), "InvalidKeyPair.NotFound") {
+		return "", fmt.Errorf("describe key pairs error, %v", err)
+	}
+
+	if keyPair == nil || len(keyPair.KeyPairs) == 0 {
+
+		newKeyPair, err := ec2Client.CreateKeyPair(ctx, &ec2.CreateKeyPairInput{
+			KeyName: aws.String(keyPairName),
+		})
+		if err != nil {
+			return "", fmt.Errorf("unable to create key pair, %v", err)
+		}
+
+		err = os.WriteFile(pemFilename, []byte(*newKeyPair.KeyMaterial), 0400)
+		if err != nil {
+			return "", fmt.Errorf("create key pair error %s", err)
+		}
+
 	}
 
 	imageOutput, err := ec2Client.DescribeImages(ctx, &ec2.DescribeImagesInput{
