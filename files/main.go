@@ -32,4 +32,7 @@ func main() {
 		}
 	}
 
+	fmt.Println("Read csv data")
+	readCsv()
+
 }
