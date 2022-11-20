@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -34,7 +35,7 @@ const (
 
 // create a custom error when budget category is not found
 var (
-	ErrBudgetCategoryNotFound = errors.New("The budget category was not found")
+	ErrBudgetCategoryNotFound = errors.New("the budget category was not found")
 )
 
 func main() {
@@ -94,13 +95,59 @@ func writeErrorToLog(msg string, err error, data string, logfile string) {
 
 func parseBankFile(bankTransactions io.Reader, logFile string) []transaction {
 
-	f, err := os.Open("bank.csv")
-	if err != nil {
-		panic(err)
-	}
+	r := csv.NewReader(bankTransactions)
+	trsx := []transaction{}
 
-	r := csv.NewReader(f)
-	fmt.Println(r)
+	header := true
+
+	for {
+		trx := transaction{}
+		record, err := r.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		if !header {
+
+			for idx, value := range record {
+
+				switch idx {
+				case 0:
+					value = strings.TrimSpace(value)
+					trx.id, err = strconv.Atoi(value)
+					if err != nil {
+						fmt.Println("Error converting")
+					}
+
+				case 1:
+					value = strings.TrimSpace(value)
+					trx.payee = value
+
+				case 2:
+					value = strings.TrimSpace(value)
+					trx.spent, err = strconv.ParseFloat(value, 64)
+					if err != nil {
+						fmt.Println("Error converting")
+					}
+
+				case 3:
+					trx.category, err = convertToBudgetCategory(value)
+					if err != nil {
+						s := strings.Join(record, ", ")
+						writeErrorToLog("error converting csv category column -", err, s, logFile)
+					}
+				}
+
+			}
+			trsx = append(trsx, trx)
+
+		}
+		header = false
+	}
+	return trsx
 }
 
 func convertToBudgetCategory(value string) (budgetCategory, error) {
