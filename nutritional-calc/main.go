@@ -10,7 +10,7 @@ func main() {
 		SaturatedFattyAcids: SaturatedFattyAcids(),
 		Sodium:              SodiumMilligram(),
 		Fruits:              FruitsPercent(),
-		Fiber:               FibreGram(),
+		Fibre:               FibreGram(),
 		Protein:             ProteinGram(),
 	}, Food)
 
