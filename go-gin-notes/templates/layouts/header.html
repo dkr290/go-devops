@@ -10,7 +10,9 @@
     <!-- Bootstrap -->
     <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
  
-
+  if {{  .alert }}
+  <div class="alert alert-primary" role="alert">{{    .alert }}</div>
+  {{ end }}
 </head>
 
     

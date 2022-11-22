@@ -30,6 +30,9 @@ func main() {
 
 	r.GET("/login", controllers.LoginPage)
 	r.GET("/signup", controllers.SignupPage)
+	r.POST("/login", controllers.Login)
+	r.POST("/signup", controllers.Signup)
+	r.POST("/logout", controllers.Logout)
 
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "home/index.html", gin.H{

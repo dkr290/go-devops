@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/dkr290/go-devops/go-gin-notes/helpers"
 	"github.com/dkr290/go-devops/go-gin-notes/models"
 	"github.com/gin-gonic/gin"
 )
@@ -97,4 +98,50 @@ func NotesDelete(c *gin.Context) {
 	models.NotesMarkDelete(id)
 	c.Redirect(http.StatusSeeOther, "/notes")
 
+}
+
+func Signup(c *gin.Context) {
+	email := c.PostForm("email")
+	password := c.PostForm("password")
+	confirmPassword := c.PostForm("confirm-password")
+
+	emailExists := models.UserCheckAvailability(email)
+	if !emailExists {
+		c.HTML(
+			http.StatusIMUsed,
+			"/home/signup.html",
+			gin.H{
+				"alert": "Email already exists",
+			},
+		)
+
+		return
+	}
+
+	if password != confirmPassword {
+		c.HTML(
+			http.StatusIMUsed,
+			"/home/signup.html",
+			gin.H{
+				"alert": "Passwords does not match",
+			},
+		)
+
+		return
+	}
+
+	user := models.UserCreate(email, password)
+	if user.ID == 0 {
+		c.HTML(
+			http.StatusIMUsed,
+			"/home/signup.html",
+			gin.H{
+				"alert": "Unable to  create the user",
+			},
+		)
+
+	} else {
+		helpers.SessionSet(c, user.ID)
+		c.Redirect(http.StatusMovedPermanently, "/")
+	}
 }
