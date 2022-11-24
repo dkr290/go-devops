@@ -42,6 +42,7 @@ func main() {
 	fmt.Println("The number is at position", find2)
 
 	makeSetItems()
+	slice1()
 
 }
 
