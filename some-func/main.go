@@ -34,6 +34,15 @@ func main() {
 
 	}
 
+	s1 := []int{1, 2, 3, 4, 5, 6, 7, 7, 10, 12, 15, 15, 18, 19, 30}
+	find1 := binarySearch(s1, 10, 0, len(s1)-1)
+	find2 := binarySearchV1(s1, 10, 0, len(s1)-1)
+
+	fmt.Println("The number is at position", find1)
+	fmt.Println("The number is at position", find2)
+
+	makeSetItems()
+
 }
 
 // passing function to another one as parameter
