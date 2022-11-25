@@ -20,6 +20,13 @@ func main() {
 
 	theSpeak(c, d, p)
 
+	intops()
+	list := NewSingleLinkedList()
+	list.Add(8)
+	list.Add(9)
+
+	fmt.Println(list)
+
 }
 
 func (c cat) Speak() string {
