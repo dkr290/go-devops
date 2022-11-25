@@ -23,6 +23,15 @@ func main() {
 	newc <- true
 	<-newc
 
+	ch1 := make(chan string)
+	go sayMultiplyTimes(ch1, 5)
+	for s := range ch1 {
+		fmt.Println(s)
+	}
+
+	v, ok := <-ch1
+	fmt.Println("Channel close?", !ok, " value", v)
+
 }
 
 func testFunc(c chan bool) {
@@ -42,4 +51,11 @@ func printSomething(c chan bool, s string) {
 		fmt.Println("THis is a simple test print: ", s)
 	}
 	c <- true
+}
+
+func sayMultiplyTimes(c chan string, v int) {
+	for i := 0; i < v; i++ {
+		c <- "Hello"
+	}
+	close(c)
 }
