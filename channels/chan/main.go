@@ -15,6 +15,14 @@ func main() {
 
 	areWeFinished := <-c
 	fmt.Printf("areWeFinished %v\n", areWeFinished)
+
+	fmt.Println("")
+	newc := make(chan bool)
+	fmt.Println("Printing from main")
+	go printSomething(newc, "Hello from inside the channel passed func")
+	newc <- true
+	<-newc
+
 }
 
 func testFunc(c chan bool) {
@@ -26,4 +34,12 @@ func testFunc(c chan bool) {
 
 	c <- true
 
+}
+
+func printSomething(c chan bool, s string) {
+
+	if b := <-c; b {
+		fmt.Println("THis is a simple test print: ", s)
+	}
+	c <- true
 }
