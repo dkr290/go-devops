@@ -33,3 +33,27 @@ func UserCreate(email, password string) *User {
 	Repo.DB.Create(&entry)
 	return &entry
 }
+
+func UserFind(sessionID uint64) *User {
+
+	var user User
+	Repo.DB.Find(&user, sessionID)
+	return &user
+
+}
+
+func UserCheck(email, password string) *User {
+
+	var user User
+	Repo.DB.Find(&user, "username")
+	if user.ID == 0 {
+		return nil
+	}
+
+	match := helpers.CheckPasswordHash(password, user.Password)
+	if match {
+		return &user
+	} else {
+		return nil
+	}
+}

@@ -5,8 +5,10 @@ import (
 	"net/http"
 
 	"github.com/dkr290/go-devops/go-gin-notes/controllers"
+	"github.com/dkr290/go-devops/go-gin-notes/middlewares"
 	"github.com/dkr290/go-devops/go-gin-notes/models"
-
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,6 +21,10 @@ func main() {
 	r.LoadHTMLGlob("templates/**/**")
 	models.ConnectDatabase()
 	models.DbMigrate()
+
+	store := memstore.NewStore([]byte("secret"))
+	r.Use(sessions.Sessions("notes", store))
+	r.Use(middlewares.AuthenticateUser())
 
 	r.GET("/notes", controllers.NotesIndex)
 	r.GET("/notes/new", controllers.NotesNew)
@@ -36,7 +42,8 @@ func main() {
 
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "home/index.html", gin.H{
-			"title": "Hello gin",
+			"title":     "Notes Application",
+			"logged_in": ctx.GetUint64("user_id") > 0,
 		})
 	})
 

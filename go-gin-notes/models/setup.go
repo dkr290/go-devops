@@ -38,4 +38,5 @@ func ConnectDatabase() {
 
 func DbMigrate() {
 	Repo.DB.AutoMigrate(&Note{})
+	Repo.DB.AutoMigrate(&User{})
 }
