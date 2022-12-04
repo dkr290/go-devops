@@ -2,18 +2,12 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 )
 
 func NewArgs() {
 
-	args := os.Args
-	if len(args) == 1 {
-		fmt.Println("Need more argments")
-		return
-	}
-
+	args := returnArgs()
 	var min, max float64
 	for i := 1; i < len(args); i++ {
 

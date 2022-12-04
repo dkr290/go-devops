@@ -2,6 +2,12 @@ package main
 
 func main() {
 
-	ReadInput()
-	NewArgs()
+	//	ReadInput()
+	//	NewArgs()
+	//errInputType()
+	Which()
+	//logSyslog()
+
+	//customlog.CreateLog()
+
 }
