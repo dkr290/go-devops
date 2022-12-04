@@ -36,4 +36,5 @@ func main() {
 	for i, v := range aSlice {
 		fmt.Println("index: ", i, "value: ", v)
 	}
+
 }
