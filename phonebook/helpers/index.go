@@ -1,6 +1,6 @@
 package helpers
 
-var index map[string]int
+var index = make(map[string]int)
 
 func CreateIndex() error {
 
