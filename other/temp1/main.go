@@ -1,16 +1,19 @@
 package main
 
-import "fmt"
-
-const (
-	Winter = 12 - (iota + 3)
-	Spring = 3
-	Summer = 6
-	Fall   = 9
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"os"
 )
 
 func main() {
 
-	fmt.Println(Winter, Spring, Summer, Fall)
+	var b bytes.Buffer
 
+	b.Write([]byte("Hello"))
+
+	fmt.Fprintf(&b, "World123")
+
+	io.Copy(os.Stdout, &b)
 }
