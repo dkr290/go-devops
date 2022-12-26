@@ -1,0 +1,2 @@
+ERROR: 2022/12/25 14:34:47 main.go:14: Somethibng has failed
+ERROR: 2022/12/25 14:36:21 main.go:12: Somethibng has failed
