@@ -1,1 +1,4 @@
 let's count some words here
+There is another scentence
+and another
+Different way with scanner scan form standart library
