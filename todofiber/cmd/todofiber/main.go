@@ -30,13 +30,13 @@ func main() {
 	Repo.DbPass = os.Getenv("DATABASE_PASS")
 	Repo.DbPort = os.Getenv("APP_PORT")
 
-	connInfo := "user=postgres password=Password123 host=172.19.158.144 sslmode=disable"
+	connInfo := fmt.Sprintf("user=%s password=%s host=%s sslmode=disable", Repo.DbUser, Repo.DbPass, Repo.DbHost)
 	initdb, err := sql.Open("postgres", connInfo)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	dbName := "todos"
+	dbName := Repo.DbName
 	_, err = initdb.Exec("create database " + dbName)
 	if strings.Contains(err.Error(), "already exists") && err != nil {
 		//handle the error
@@ -47,7 +47,7 @@ func main() {
 	}
 	initdb.Close()
 
-	connStr := "postgresql://postgres:Password123@172.19.158.144/todos?sslmode=disable"
+	connStr := fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=disable", Repo.DbUser, Repo.DbPass, Repo.DbHost, dbName)
 	// Connect to database
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
