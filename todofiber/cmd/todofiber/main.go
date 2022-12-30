@@ -24,7 +24,11 @@ func main() {
 	app := fiber.New(fiber.Config{
 		Views: engine,
 	})
-	port := os.Getenv("APP_PORT")
+	Repo.DbUser = os.Getenv("DATABASE_USER")
+	Repo.DbHost = os.Getenv("DATABASE_HOST")
+	Repo.DbName = "todos"
+	Repo.DbPass = os.Getenv("DATABASE_PASS")
+	Repo.DbPort = os.Getenv("APP_PORT")
 
 	connInfo := "user=postgres password=Password123 host=172.19.158.144 sslmode=disable"
 	initdb, err := sql.Open("postgres", connInfo)
@@ -71,10 +75,10 @@ func main() {
 		return handlers.DeleteHandler(db, c)
 	})
 
-	if port == "" {
-		port = "3000"
+	if Repo.DbPort == "" {
+		Repo.DbPort = "3000"
 	}
 
 	app.Static("/", "./public")
-	log.Fatalln(app.Listen(fmt.Sprintf(":%v", port)))
+	log.Fatalln(app.Listen(fmt.Sprintf(":%v", Repo.DbPort)))
 }
