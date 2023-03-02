@@ -46,4 +46,15 @@ func main() {
 
 	fmt.Println("The string is", cv8)
 
+	cv9 := "8.21"
+
+	if cv10, err := strconv.ParseFloat(cv9, 64); err != nil {
+		log.Fatal(err)
+	} else {
+		fmt.Println(cv10)
+	}
+
+	cv11 := fmt.Sprintf("%f", 8.21)
+	fmt.Println(cv11)
+
 }
