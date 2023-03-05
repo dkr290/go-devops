@@ -43,7 +43,7 @@ func checkAge(age int) {
 		fmt.Println("Go to kindergarten")
 	} else if (age > 5) && (age <= 17) {
 		grade := age - 5
-		fmt.Printf("Go to grade %d", grade)
+		fmt.Printf("Go to grade %d\n", grade)
 	} else {
 		fmt.Println("Go to college")
 	}
